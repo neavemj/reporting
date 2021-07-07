@@ -1,0 +1,78 @@
+---
+output:
+  officedown::rdocx_document: default
+
+---
+
+```{r setup, include=FALSE, warning = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(knitr)
+library(dplyr)
+library(officedown)
+library(officer)
+library(rmarkdown)
+library("ggmsa")
+library(ggplot2)
+library(yaml)
+
+```
+
+```{r yaml, include = FALSE}
+
+config <- read_yaml("/RFolder/Notepad++/ReportTEST.yml")
+SAN <- config$SAN
+aa_seq_src <- config$`aa sequence alignment`
+phylo_tree_Src <- config$`phlyogenetic tree`
+H_type <- config$`H type`
+
+Figure_numbers <- run_autonum(seq_id = "Figure", pre_label = "Fig. ")
+
+```
+
+# This is the sequencing report for `r SAN`
+Some writing
+
+
+<!---BLOCK_LANDSCAPE_START--->
+
+
+```{r sequence, fig.asp = 0.3, fig.width = 10, echo = FALSE, warning = FALSE, message = FALSE}
+
+p <- ggmsa(aa_seq_src,
+      char_width = 0.9,
+      seq_name = TRUE,
+      color = "Chemistry_AA" ) +
+  facet_msa(field = 70) 
+
+dummy <- subset(p$layers[[1]]$data,  facet == 0)
+
+p + geom_rect(data = dummy, mapping = aes(xmin = 40.5, xmax = 50, ymin = -Inf, ymax = Inf),
+ color = "black", size = 1.5, fill = NA) 
+
+fpar(Figure_numbers,
+  ftext(
+  paste(SAN, H_type, "HA amino acid sequence alignment. Position of the multi-basic HA cleavage site is indicated by the black box.", sep = " "), fp_text(italic = TRUE)),
+fp_p = fp_par(text.align = "center"))
+
+
+```
+
+<!---BLOCK_LANDSCAPE_STOP--->
+
+
+```{r image, echo=FALSE}
+
+fpar(
+external_img(src = phylo_tree_Src, height = 7.87, width = 6.5),
+
+fp_p = fp_par(text.align = "center", padding.bottom = 30)
+)
+
+fpar(Figure_numbers,
+  ftext(
+  paste("Phylogenetic tree based on near full-length", H_type,"HA gene sequences (1648bp) showing the relationship of sample", SAN, "(Red) to other endemic and exotic", H_type, "HA viruses.", sep = " "), fp_text(italic = TRUE)),
+fp_p = fp_par(text.align = "left", border = fp_border(color = "black", style = "solid", width = 0.5)))
+
+
+
+```
