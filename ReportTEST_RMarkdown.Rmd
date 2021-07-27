@@ -35,21 +35,12 @@ Sample_ID <- config$`Table 1`$`Sample ID`
 Host <- config$`Table 1`$Host
 Cleavage_site <- config$`Table 1`$`HA cleavage site sequence`
 
-Figure_numbers <- run_autonum(seq_id = "Figure", pre_label = "Fig. ")
+Figure_numbers <- run_autonum(seq_id = "Figure", pre_label = "Fig. ", bkm = NULL)
 Table_numbers <- run_autonum(seq_id = "Table", pre_label = "Table ")
 
 ```
 
-```{r title}
-
-fpar(
-  ftext(
-    paste("Sequencing Report for SAN", SAN, sep = " "), fp_text(font.size = 14, bold = TRUE)
-  ),
-  fp_p = fp_par(padding.bottom = 10)
-)
-
-```
+# Sequencing Report for `r SAN`
 
 This report provides a phylogenetic analysis of the `r H_type` avian influenza A positive sample detected in SAN `r SAN` with comparison to `r Sequence_Datasets`.
 
@@ -58,7 +49,7 @@ Avian influenza A virus (AIV) HA sequences of `r H_type` subtype was generated d
 * Dot point 1
 * Dot point 2
 
-```{r Table 1}
+```{r summary-table}
 
 #Table caption
 
@@ -92,7 +83,7 @@ flextable(Table_1_dataset)%>%
   
 ```
 
-```{r sequence similarities}
+```{r sequence-similarities}
 
 
 
@@ -102,9 +93,9 @@ flextable(Table_1_dataset)%>%
 block_section(prop_section(type = "continuous"))
 ```
 
-```{r sequence, fig.asp = 0.3, fig.width = 10}
+```{r amino-acid-sequence, fig.asp = 0.3, fig.width = 10}
 
-#Figure placement
+#Figure function
 
 p <- ggmsa(aa_seq_src,
       char_width = 0.9,
@@ -134,7 +125,7 @@ block_section(
 ```
 
 
-```{r image}
+```{r phylogenetic-tree-image}
 
 #Figure placement
 
