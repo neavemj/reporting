@@ -16,6 +16,8 @@ library(ggplot2)
 library(yaml)
 library(flextable)
 library(optparse)
+library('rmarkdown')
+rmarkdown::render('C:/RFolder/github/reporting/ReportTEST_RMarkdown.R')
 
 # set chunks defaults
 knitr::opts_chunk$set(
