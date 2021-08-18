@@ -15,6 +15,7 @@ library("ggmsa")
 library(ggplot2)
 library(yaml)
 library(flextable)
+library(optparse)
 
 # set chunks defaults
 knitr::opts_chunk$set(
@@ -23,20 +24,49 @@ knitr::opts_chunk$set(
   warning    = FALSE
 )
 
-#config file
+# use optparse to grab command line arguments for the report
 
-config <- read_yaml("/RFolder/Notepad++/ReportTEST.yml")
-SAN <- config$SAN
-aa_seq_src <- config$`aa sequence alignment`
-phylo_tree_Src <- config$`phlyogenetic tree`
-H_type <- config$H_type
-Sequence_Datasets <- config$`Sequence Datasets`
-Sample_ID <- config$`Table 1`$`Sample ID`
-Host <- config$`Table 1`$Host
-Cleavage_site <- config$`Table 1`$`HA cleavage site sequence`
+option_list <- list(
+  # required args
+  make_option(c("--SAN"), type="character", default=NULL,
+              help="ACDP SAN number of job", metavar="character"),
+  make_option(c("--SampleID"), type="character", default=NULL,
+              help="ACDP Sample IDs analysed", metavar="character"),
+  make_option(c("--Host"), type="character", default=NULL,
+              help="Type of animal sample derived from", metavar="character"),
+  make_option(c("--H_type"), type="character", default=NULL,
+              help="H type identified", metavar="character"),
+  make_option(c("--CleavageSite"), type="character", default=NULL,
+              help="Cleavage Site sequence", metavar="character"),
+  make_option(c("--tree"), type="character", default=NULL,
+              help="Phylogenetic tree in image format", metavar="character"),
+  make_option(c("--HA_gene"), type="character", default=NULL,
+              help="HA sequence in fasta format", metavar="character"),
+  make_option(c("--datasets"), type="character", default=NULL,
+              help="Sequence datasets used for comparison purposes", metavar="character")
+)
+
+
+opt_parser <- OptionParser(option_list=option_list)
+opt <- parse_args(opt_parser)
+
+# now read data for making the report
+
+SAN <- opt$SAN
+Sample_ID <- opt$SampleID
+Host <- opt$Host
+H_type <- opt$H_type
+Cleavage_site <- opt$CleavageSite
+phylo_tree_Src <- opt$tree
+aa_seq_src <- opt$HA_gene 
+Sequence_Datasets <- opt$datasets
+
+
+#Figure and table formatting
 
 Figure_numbers <- run_autonum(seq_id = "Figure", pre_label = "Fig. ", bkm = NULL)
 Table_numbers <- run_autonum(seq_id = "Table", pre_label = "Table ")
+
 
 ```
 
