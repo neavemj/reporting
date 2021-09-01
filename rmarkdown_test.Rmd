@@ -1,7 +1,7 @@
 ---
 output:
   officedown::rdocx_document:
-    reference_docx: "template.docx"
+    reference_docx: "custom-reference.docx"
 params:
   SAN: "NA"
   Sample_ID: "NA"
@@ -10,7 +10,6 @@ params:
   Cleavage_site: "NA"
   phylo_tree_Src: "NA"
   aa_seq_src: "NA"
-  Sequence_Datasets: "NA"
 ---
 
 
@@ -42,7 +41,6 @@ H_type <- params$H_type
 Cleavage_site <- params$Cleavage_site
 phylo_tree_Src <- params$phylo_tree_Src
 aa_seq_src <- params$aa_seq_src
-Sequence_Datasets <- params$Sequence_Datasets
 
 
 #Figure and table formatting
@@ -53,14 +51,32 @@ Table_numbers <- run_autonum(seq_id = "Table", pre_label = "Table ")
 
 ```
 
-# Sequencing Report for `r SAN`
+# Next Generation Sequencing Analysis for SAN `r SAN`
 
-This report provides a phylogenetic analysis of the `r H_type` avian influenza A positive sample detected in SAN `r SAN` with comparison to `r Sequence_Datasets`.
+This analysis provides an identity analysis of the whole genome sequence data generated at ACDP (AAHL) `r SAN` samples.
 
-Avian influenza A virus (AIV) HA sequences of `r H_type` subtype was generated directly from the sample as shown in Table 1.
+**Interpretation**
+
+The HA gene sequence data suggests that the detected virus is most similar to ...
 
 * Dot point 1
 * Dot point 2
+
+**This analysis contains:**
+
+1. Sample information from which sequences were obtained
+2. Phylogenetic tree showing the relationship of sample `r SAN` with other viruses
+3. HA sequence alignment comparison to virus sequence with ...
+4. BLAST results for each gene segment for sample `r SAN`
+
+```{r}
+block_section(prop_section(type = "continuous"))
+```
+
+## 1. Sample information from which sequences were obtained**
+
+Avian influenza A virus (AIV) whole genome sequences of the XXXX subtype was generated directly from the samples as shown in Table 1.
+All XXXX samples shared XXXX% nucleotide and XXXX% amino acid similarity for the eight viral segments.
 
 ```{r summary-table}
 
@@ -94,16 +110,13 @@ flextable(Table_1_dataset)%>%
   border_outer(part="all", border = thick_border)%>%
   border_inner_v(part = "all", border = thin_border)
   
-```
+block_section(
+  prop_section(
+      page_size = page_size(orient = "portrait"),
+      type = "continuous"
+  )
+)
 
-```{r sequence-similarities}
-
-
-
-```
-
-```{r}
-block_section(prop_section(type = "continuous"))
 ```
 
 ```{r amino-acid-sequence, fig.asp = 0.3, fig.width = 10}
