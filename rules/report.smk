@@ -16,6 +16,8 @@ The outputs are:
     - a report in Microsoft word format
 """
 
+configfile: "config.yaml"
+
 rule make_report:
     message:
         """
@@ -23,26 +25,26 @@ rule make_report:
         Making the report in R
         """
     input:
-        SAN = "21-00000",
-        SampleID = "21-000-ID",
-        Host = "wild bird",
-        H_type = "H7",
-        CleavageSite = "PEIPGKR*GLF",
-        tree = "/RFolder/Resources/H7N7_20-02853_tree.png",
-        HA_gene = "/RFolder/Resources/HA_alignment.align.fasta",
-        datasets = "NAIWB sequence datasets and recent Victorian H7 (chicken and emu) outbreaks"
+      # SAN = "21-00000",
+      # SampleID = "21-000-ID",
+      # Host = "wild bird",
+      # H_type = "H7",
+      # CleavageSite = "PEIPGKR*GLF",
+       tree = "/flush5/sco308/aiv_pipeline/introduction/raw_data/H7N7_20-02853_tree.png",
+       HA_gene = "/flush5/sco308/aiv_pipeline/introduction/raw_data/HA_alignment.align.fasta",
+       rmarkdown = config["program_dir"] + "/reporting/rmarkdown_test.Rmd"
     output:
-        report = "../reporting/reportTEST_01.docx"
+        report = "/flush5/sco308/aiv_pipeline/testing/reportTEST_01.docx"
     shell:
         """
-        Rscript {config[program_dir]}/reporting/ReportTest_RMarkdown.Rmd \
-            --SAN {input.SAN} \
-            --SampleID {input.SampleID} \
-            --Host {input.Host} \
-            --H_type {input.H_type) \
-            --CleavageSite {input.CleavageSite} \
+        Rscript {config[program_dir]}/reporting/run_rmarkdown.R \
+            --SAN 21-00344 \
+            --SampleID 34 \
+            --Host Duck \
+            --H_type H7 \
+            --CleavageSite PEKQTR*GLF \
             --tree {input.tree} \
             --HA_gene {input.HA_gene} \
-            --datasets {input.datasets} \
+            --rmarkdown {input.rmarkdown} \
             --output {output.report}
         """

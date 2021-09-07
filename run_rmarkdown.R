@@ -20,7 +20,11 @@ option_list <- list(
   make_option(c("--tree"), type="character", default=NULL,
               help="Phylogenetic tree in image format", metavar="character"),
   make_option(c("--HA_gene"), type="character", default=NULL,
-              help="HA sequence in fasta format", metavar="character")
+              help="HA sequence in fasta format", metavar="character"),
+  make_option(c("--output"), type="character", default=NULL,
+              help="name and file path for word doc", metavar="character"),
+  make_option(c("--rmarkdown"), type="character", default=NULL,
+              help="location of rmarkdown file", metavar="character")
 )
 
 
@@ -29,8 +33,8 @@ opt <- parse_args(opt_parser)
 
 # now read data for making the report
 
-render("rmarkdown_test.Rmd",
-    rdocx_document(reference_docx = "custom-reference.docx"),
+render(opt$rmarkdown,
+    rdocx_document(reference_docx = "/flush5/sco308/aiv_pipeline/reporting/custom-reference.docx"),
     params = list(
     SAN = opt$SAN,
     Sample_ID = opt$SampleID,
@@ -39,5 +43,6 @@ render("rmarkdown_test.Rmd",
     Cleavage_site = opt$CleavageSite,
     phylo_tree_Src = opt$tree,
     aa_seq_src = opt$HA_gene
-    ))
+    ),
+    output_file = opt$output)
 
