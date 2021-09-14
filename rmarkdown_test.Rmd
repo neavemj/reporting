@@ -32,7 +32,6 @@ knitr::opts_chunk$set(
   warning    = FALSE
 )
 
-
 # now read data for making the report
 
 SAN <- params$SAN
@@ -152,23 +151,29 @@ block_section(
 ```
 
 
-```{r phylogenetic-tree-image}
+```{r phylogenetic-tree-image, error = FALSE}
 
 #Figure placement
 
+H5_H7_tree <- try(
 fpar(
 external_img(src = phylo_tree_Src, height = 7.87, width = 6.5),
 
 fp_p = fp_par(text.align = "center")
-)
+), silent = TRUE)
+
+if(class(H5_H7_tree) != "try-error"){
+H5_H7_tree
+}
 
 #Figure caption
 
+if(class(H5_H7_tree) != "try-error"){
 fpar(Figure_numbers,
   ftext(
   paste("Phylogenetic tree based on near full-length", H_type,"HA gene sequences (1648bp) showing the relationship of sample", SAN, "(Red) to other endemic and exotic", H_type, "HA viruses.", sep = " "), fp_text(italic = TRUE)),
 fp_p = fp_par(text.align = "left", border = fp_border(color = "black", style = "solid", width = 0.5)))
-
+}
 
 
 ```
