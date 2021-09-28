@@ -3,10 +3,8 @@ output:
   officedown::rdocx_document:
     reference_docx: "custom-reference.docx"
 params:
-  SAN: "NA"
-  Sample_ID: "NA"
-  Host: "NA"
-  H_type: "NA"
+  SAN_table: "NA"
+  subtype_table: "NA"
   Cleavage_site: "NA"
   phylo_tree_Src: "NA"
   aa_seq_src: "NA"
@@ -34,13 +32,13 @@ knitr::opts_chunk$set(
 
 # now read data for making the report
 
-SAN <- params$SAN
-Sample_ID <- params$Sample_ID
-Host <- params$Host
-H_type <- params$H_type
+SAN_table <- params$SAN_table
+subtype_table <- params$subtype_table
+
 Cleavage_site <- params$Cleavage_site
 phylo_tree_Src <- params$phylo_tree_Src
 aa_seq_src <- params$aa_seq_src
+
 
 
 #Figure and table formatting
