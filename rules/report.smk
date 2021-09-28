@@ -94,7 +94,7 @@ rule make_report:
     params:
         subtype_table = expand("02_irma_assembly/{sample}/irma_output/tables/READ_COUNTS.txt", sample=config["samples"])
     output:
-        report = "reportTEST_01.docx"
+        report = "report01.docx"
     shell:
         """
         Rscript {config[program_dir]}/reporting/run_rmarkdown.R \
