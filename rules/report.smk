@@ -34,7 +34,7 @@ rule make_report:
        HA_gene = "/flush5/sco308/aiv_pipeline/introduction/raw_data/HA_alignment.align.fasta",
        rmarkdown = config["program_dir"] + "/reporting/rmarkdown_test.Rmd"
     output:
-        report = "/flush5/sco308/aiv_pipeline/testing/reportTEST_01.docx"
+        report = "/flush5/sco308/aiv_pipeline/testing/reportTEST_02.docx"
     shell:
         """
         Rscript {config[program_dir]}/reporting/run_rmarkdown.R \
