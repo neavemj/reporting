@@ -24,7 +24,11 @@ option_list <- list(
               
   make_option(c("--output"), type="character", default=NULL,
               help="name and file path for word doc", metavar="character"),
-              
+
+  make_option(c("--output_dir"), type="character", default=NULL,
+              help="directory to put word doc. Otherwise rmarkdown puts
+              the output in the same directory as the markdown document", metavar="character"),
+             
   make_option(c("--rmarkdown"), type="character", default=NULL,
               help="location of rmarkdown file", metavar="character")
 )
@@ -32,6 +36,12 @@ option_list <- list(
 
 opt_parser <- OptionParser(option_list=option_list)
 opt <- parse_args(opt_parser)
+
+# need to grab the working project directory here
+# otherwise rmarkdown uses the directory where the markdown document
+# is located as the working directory. 
+
+working_dir <- getwd()
 
 # now read data for making the report
 
@@ -44,5 +54,6 @@ render(opt$rmarkdown,
     phylo_tree_Src = opt$tree,
     aa_seq_src = opt$HA_gene
     ),
-    output_file = opt$output)
+    output_file = opt$output,
+    output_dir = opt$output_dir)
 
