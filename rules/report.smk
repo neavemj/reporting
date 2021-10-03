@@ -92,9 +92,9 @@ rule make_report:
        HA_gene = "../introduction/raw_data/HA_alignment.align.fasta",
        rmarkdown = config["program_dir"] + "reporting/rmarkdown_test.Rmd"
     params:
-        subtype_table = expand("02_irma_assembly/{sample}/irma_output/tables/READ_COUNTS.txt", sample=config["samples"])
+       subtype_table = expand("02_irma_assembly/{sample}/irma_output/tables/READ_COUNTS.txt", sample=config["samples"])
     output:
-        report = "report01.docx"
+       report = "report01.docx"
     shell:
         """
         Rscript {config[program_dir]}/reporting/run_rmarkdown.R \
@@ -124,7 +124,7 @@ rule make_report_testing:
        HA_gene = "/flush5/sco308/aiv_pipeline/introduction/raw_data/HA_alignment.align.fasta",
        rmarkdown = config["program_dir"] + "/reporting/rmarkdown_test.Rmd"
     output:
-        report = "/flush5/sco308/aiv_pipeline/testing/reportTEST_02.docx"
+        report = "reportTEST_01.docx"
     shell:
         """
         Rscript {config[program_dir]}/reporting/run_rmarkdown.R \
