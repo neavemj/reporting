@@ -115,26 +115,29 @@ rule make_report_testing:
         Making the report in R
         """
     input:
-      # SAN = "21-00000",
+       SAN_table = f"san_{list(config['samples'].keys())[0][0:8]}_dump.csv",
+       run_IRMA = expand("02_irma_assembly/{sample}/IRMA_COMPLETE", sample=config["samples"]),
+       run_tree = expand("04_phylogenetics/{sample}_tree_finished.txt", sample=config["samples"]),
+       HA_gene = "../introduction/raw_data/HA_alignment.align.fasta",
       # SampleID = "21-000-ID",
       # Host = "wild bird",
       # H_type = "H7",
       # CleavageSite = "PEIPGKR*GLF",
-       tree = "/flush5/sco308/aiv_pipeline/introduction/raw_data/H7N7_20-02853_tree.png",
-       HA_gene = "/flush5/sco308/aiv_pipeline/introduction/raw_data/HA_alignment.align.fasta",
+      # run_tree = "/flush5/sco308/aiv_pipeline/introduction/raw_data/H7N7_20-02853_tree.png"
        rmarkdown = config["program_dir"] + "/reporting/rmarkdown_test.Rmd"
+    params:
+       subtype_table = expand("02_irma_assembly/{sample}/irma_output/tables/READ_COUNTS.txt", sample=config["samples"])
     output:
         report = "reportTEST_01.docx"
     shell:
         """
         Rscript {config[program_dir]}/reporting/run_rmarkdown.R \
-            --SAN 21-00344 \
-            --SampleID 34 \
-            --Host Duck \
-            --H_type H7 \
+            --SAN_table 21-0000 \
+            --subtype_table {params.subtype_table} \
             --CleavageSite PEKQTR*GLF \
-            --tree {input.tree} \
+            --tree {input.run_tree} \
             --HA_gene {input.HA_gene} \
             --rmarkdown {input.rmarkdown} \
-            --output {output.report}
+            --output {output.report} \
+            --output_dir {config["output_dir"]}
         """

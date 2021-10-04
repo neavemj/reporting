@@ -13,6 +13,9 @@ params:
 
 
 ```{r setup, include=FALSE, warning = FALSE}
+
+knitr::opts_knit$set(root.dir = working_dir)
+
 library(knitr)
 library(dplyr)
 library(officedown)
@@ -46,6 +49,22 @@ aa_seq_src <- params$aa_seq_src
 Figure_numbers <- run_autonum(seq_id = "Figure", pre_label = "Fig. ", bkm = NULL)
 Table_numbers <- run_autonum(seq_id = "Table", pre_label = "Table ")
 
+
+```
+
+``` {r}
+
+# SAN_tb = read.csv(SAN_table)
+
+# SAN = SAN_tb[1,1][1:8]
+
+SAN = SAN_table
+
+subtype_tb = read.delim(subtype_table, sep="\t")
+
+column1 = subtype_tb[,1]
+
+H_type = gsub("4-A_HA_", "", column1[grepl("4-A_HA", column1)])
 
 ```
 
@@ -89,8 +108,8 @@ fpar(Table_numbers,
 
 #Table data 
 
-Table_1_dataset <- matrix(c(SAN, Sample_ID, Host, H_type, Cleavage_site), ncol = 5)
-colnames(Table_1_dataset) <- c("ACDP (AAHL) Sample No.", "Sample ID", "Host", "Subtype", "HA cleavage site sequence")
+Table_1_dataset <- matrix(c(SAN, H_type, Cleavage_site), ncol = 3)
+colnames(Table_1_dataset) <- c("ACDP (AAHL) Sample No.", "HA type", "HA cleavage site sequence")
 Table_1_dataset <- as.data.frame(Table_1_dataset)
 
 #Table formatting
