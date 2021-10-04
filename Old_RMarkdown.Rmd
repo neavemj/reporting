@@ -1,0 +1,179 @@
+---
+output:
+  officedown::rdocx_document:
+    reference_docx: "C:/RFolder/github/reporting/template.docx"
+
+---
+
+```{r setup, include=FALSE, warning = FALSE}
+library(knitr)
+library(dplyr)
+library(officedown)
+library(officer)
+library(rmarkdown)
+library("ggmsa")
+library(ggplot2)
+library(yaml)
+library(flextable)
+library(optparse)
+library('rmarkdown')
+rmarkdown::render('C:/RFolder/github/reporting/ReportTEST_RMarkdown.R')
+
+# set chunks defaults
+knitr::opts_chunk$set(
+  echo       = FALSE,
+  message    = FALSE,
+  warning    = FALSE
+)
+
+# use optparse to grab command line arguments for the report
+
+option_list <- list(
+  # required args
+  make_option(c("--SAN"), type="character", default=NULL,
+              help="ACDP SAN number of job", metavar="character"),
+  make_option(c("--SampleID"), type="character", default=NULL,
+              help="ACDP Sample IDs analysed", metavar="character"),
+  make_option(c("--Host"), type="character", default=NULL,
+              help="Type of animal sample derived from", metavar="character"),
+  make_option(c("--H_type"), type="character", default=NULL,
+              help="H type identified", metavar="character"),
+  make_option(c("--CleavageSite"), type="character", default=NULL,
+              help="Cleavage Site sequence", metavar="character"),
+  make_option(c("--tree"), type="character", default=NULL,
+              help="Phylogenetic tree in image format", metavar="character"),
+  make_option(c("--HA_gene"), type="character", default=NULL,
+              help="HA sequence in fasta format", metavar="character"),
+  make_option(c("--datasets"), type="character", default=NULL,
+              help="Sequence datasets used for comparison purposes", metavar="character")
+)
+
+
+opt_parser <- OptionParser(option_list=option_list)
+opt <- parse_args(opt_parser)
+
+# now read data for making the report
+
+SAN <- opt$SAN
+Sample_ID <- opt$SampleID
+Host <- opt$Host
+H_type <- opt$H_type
+Cleavage_site <- opt$CleavageSite
+phylo_tree_Src <- opt$tree
+aa_seq_src <- opt$HA_gene 
+Sequence_Datasets <- opt$datasets
+
+
+#Figure and table formatting
+
+Figure_numbers <- run_autonum(seq_id = "Figure", pre_label = "Fig. ", bkm = NULL)
+Table_numbers <- run_autonum(seq_id = "Table", pre_label = "Table ")
+
+
+```
+
+# Sequencing Report for `r SAN`
+
+This report provides a phylogenetic analysis of the `r H_type` avian influenza A positive sample detected in SAN `r SAN` with comparison to `r Sequence_Datasets`.
+
+Avian influenza A virus (AIV) HA sequences of `r H_type` subtype was generated directly from the sample as shown in Table 1.
+
+* Dot point 1
+* Dot point 2
+
+```{r summary-table}
+
+#Table caption
+
+fpar(Table_numbers,
+  ftext(
+  paste(SAN, "AIV PCR positive samples from which virus sequences were obtained", sep = " "), 
+  fp_text(italic = TRUE)),
+  fp_p = fp_par(padding.bottom = 10)
+  )
+
+#Table data 
+
+Table_1_dataset <- matrix(c(SAN, Sample_ID  , Host, H_type, Cleavage_site), ncol = 5)
+colnames(Table_1_dataset) <- c("ACDP (AAHL) Sample No.", "Sample ID", "Host", "Subtype", "HA cleavage site sequence")
+Table_1_dataset <- as.data.frame(Table_1_dataset)
+
+#Table formatting
+
+thick_border = fp_border(color="black", width = 2)
+thin_border = fp_border(color="gray", width = 0.5)
+
+flextable(Table_1_dataset)%>%
+  fontsize(part = "all", size = 10) %>%
+  bold(i = 1, part = "header") %>%
+  align(align = "center", part = "all") %>%
+  set_table_properties(width = 1, layout = "autofit") %>%
+  padding(padding = 5, part = "all") %>%
+  border_remove() %>%
+  border_outer(part="all", border = thick_border)%>%
+  border_inner_v(part = "all", border = thin_border)
+  
+```
+
+```{r sequence-similarities}
+
+
+
+```
+
+```{r}
+block_section(prop_section(type = "continuous"))
+```
+
+```{r amino-acid-sequence, fig.asp = 0.3, fig.width = 10}
+
+#Figure function
+
+p <- ggmsa(aa_seq_src,
+      char_width = 0.9,
+      seq_name = TRUE,
+      color = "Chemistry_AA" ) +
+  facet_msa(field = 70) 
+
+dummy <- subset(p$layers[[1]]$data,  facet == 0)
+
+p + geom_rect(data = dummy, mapping = aes(xmin = 40.5, xmax = 50, ymin = -Inf, ymax = Inf),
+ color = "black", size = 1.5, fill = NA) 
+
+#Figure caption
+
+fpar(Figure_numbers,
+  ftext(
+  paste(SAN, H_type, "HA amino acid sequence alignment. Position of the multi-basic HA cleavage site is indicated by the black box.", sep = " "), fp_text(italic = TRUE)),
+fp_p = fp_par(text.align = "center"))
+
+block_section(
+  prop_section(
+      page_size = page_size(orient = "landscape"),
+      type = "continuous"
+  )
+)
+
+```
+
+
+```{r phylogenetic-tree-image}
+
+#Figure placement
+
+fpar(
+external_img(src = phylo_tree_Src, height = 7.87, width = 6.5),
+
+fp_p = fp_par(text.align = "center")
+)
+
+#Figure caption
+
+fpar(Figure_numbers,
+  ftext(
+  paste("Phylogenetic tree based on near full-length", H_type,"HA gene sequences (1648bp) showing the relationship of sample", SAN, "(Red) to other endemic and exotic", H_type, "HA viruses.", sep = " "), fp_text(italic = TRUE)),
+fp_p = fp_par(text.align = "left", border = fp_border(color = "black", style = "solid", width = 0.5)))
+
+
+
+```
