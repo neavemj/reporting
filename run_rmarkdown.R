@@ -51,7 +51,7 @@ render(opt$rmarkdown,
     SAN_table = opt$SAN_table,
     subtype_table = opt$subtype_table,
     Cleavage_site = opt$CleavageSite,
-    phylo_tree_Src = opt$tree,
+    tree = opt$tree,
     aa_seq_src = opt$HA_gene
     ),
     output_file = opt$output,

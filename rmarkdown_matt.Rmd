@@ -174,9 +174,11 @@ block_section(
 
 #Figure placement
 
+tree_png <- read.delim(phylo_tree_Src)
+
 H5_H7_tree <- try(
 fpar(
-external_img(src = phylo_tree_Src, height = 7.87, width = 6.5),
+external_img(src = tree_png, height = 7.87, width = 6.5),
 
 fp_p = fp_par(text.align = "center")
 ), silent = TRUE)
