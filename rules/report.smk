@@ -104,7 +104,8 @@ rule make_report:
             --tree {input.run_tree} \
             --HA_gene {input.HA_gene} \
             --rmarkdown {input.rmarkdown} \
-            --output {output.report}
+            --output {output.report} \
+            --output_dir .
         """
             
 
@@ -139,5 +140,5 @@ rule make_report_testing:
             --HA_gene {input.HA_gene} \
             --rmarkdown {input.rmarkdown} \
             --output {output.report} \
-            --output_dir {config["output_dir"]}
+            --output_dir .
         """
