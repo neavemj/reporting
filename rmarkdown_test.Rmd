@@ -6,6 +6,7 @@ params:
   SAN_table: "NA"
   subtype_table: "NA"
   Cleavage_site: "NA"
+  BLAST_table: "NA"
   tree: "NA"
   aa_seq_src: "NA"
   output: "NA"
@@ -72,6 +73,8 @@ tree_text <- read.delim(tree, header = FALSE)
 
 tree_png <- tree_text[1,1]
 
+BLAST_tb = read.csv(BLAST_table, header = FALSE)
+
 ```
 
 # Next Generation Sequencing Analysis for SAN `r SAN`
@@ -98,9 +101,9 @@ block_section(prop_section(type = "continuous"))
 
 ## 1. Sample information from which sequences were obtained**
 
-Avian influenza A virus (AIV) whole genome sequences of the `r H_type` subtype was generated <mark>directly from the samples / from virus isolates</mark> as shown in Table 1.
+Avian influenza A virus (AIV) whole genome sequences of the `r H_type` subtype was generated directly from the samples / from virus isolates as shown in Table 1.
 
-<mark>All XXXX samples shared XXXX% nucleotide and XXXX% amino acid similarity for the eight viral segments. [delete if not applicable]</mark>
+All XXXX samples shared XXXX% nucleotide and XXXX% amino acid similarity for the eight viral segments. [delete if not applicable]
 
 ```{r summary-table}
 
@@ -193,5 +196,54 @@ fpar(Figure_numbers,
   paste("Phylogenetic tree based on near full-length", H_type,"HA gene sequences (1648bp) showing the relationship of sample", SAN, "(green) to other endemic and exotic", H_type, "HA viruses.", sep = " "), fp_text(italic = TRUE)),
 fp_p = fp_par(text.align = "left", border = fp_border(color = "black", style = "solid", width = 0.5)))
 }
+
+```
+
+```{r}
+block_section(prop_section(type = "continuous"))
+```
+
+```{r blast-tables}
+
+#Table caption
+
+fpar(Table_numbers,
+  ftext(
+  paste("Nucleotide BLAST analysis of the", H_type, "-HA segment from", SAN, "against the NCBI GenBank and National Avian Influenza in Wild Birds (NAIWB) surveillance virus sequence database. This table shows the 10 highest pairwise matching virus sequences", sep = " "), 
+  fp_text(italic = TRUE)),
+  fp_p = fp_par(padding.bottom = 10)
+  )
+
+#Table data 
+
+BLAST_id = BLAST_tb[, 2]
+BLAST_accession = BLAST_tb [, 3]
+Percent_match = BLAST_tb[, 6]
+
+BLAST_table_dataset <- matrix(c(BLAST_id, BLAST_accession, Percent_match), ncol = 3)
+colnames(BLAST_table_dataset) <- c("Closest available match", "Accession", "Similarity (%)")
+BLAST_table_dataset <- as.data.frame(BLAST_table_dataset)
+
+#Table formatting
+
+thick_border = fp_border(color="black", width = 2)
+thin_border = fp_border(color="gray", width = 0.5)
+
+flextable(BLAST_table_dataset)%>%
+  fontsize(part = "all", size = 10) %>%
+  bold(i = 1, part = "header") %>%
+  align(align = "center", part = "all") %>%
+  set_table_properties(width = 1, layout = "autofit") %>%
+  padding(padding = 5, part = "all") %>%
+  border_remove() %>%
+  border_outer(part="all", border = thick_border)%>%
+  border_inner_v(part = "all", border = thin_border)
+  
+block_section(
+  prop_section(
+      page_size = page_size(orient = "portrait"),
+      type = "continuous"
+  )
+)
 
 ```

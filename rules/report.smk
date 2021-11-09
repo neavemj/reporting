@@ -90,11 +90,12 @@ rule make_report:
        run_IRMA = expand("02_irma_assembly/{sample}/IRMA_COMPLETE", sample=config["samples"]),
        run_tree = expand("04_phylogenetics/{sample}_tree_finished.txt", sample=config["samples"]),
        HA_gene = "../introduction/raw_data/HA_alignment.align.fasta",
-       rmarkdown = config["program_dir"] + "reporting/rmarkdown_test.Rmd"
+       rmarkdown = config["program_dir"] + "reporting/rmarkdown_test.Rmd",
+       BLAST_table = "../introduction/raw_data/BLAST examples/blastresults.HA.csv"
     params:
        subtype_table = expand("02_irma_assembly/{sample}/irma_output/tables/READ_COUNTS.txt", sample=config["samples"])
     output:
-       report = "report01.docx"
+       report = "report.docx"
     shell:
         """
         Rscript {config[program_dir]}/reporting/run_rmarkdown.R \
@@ -103,6 +104,7 @@ rule make_report:
             --CleavageSite PEKQTR*GLF \
             --tree {input.run_tree} \
             --HA_gene {input.HA_gene} \
+            --BLAST_table {input.BLAST_table} \
             --rmarkdown {input.rmarkdown} \
             --output {output.report} \
             --output_dir .
@@ -125,7 +127,8 @@ rule make_report_testing:
       # H_type = "H7",
       # CleavageSite = "PEIPGKR*GLF",
       # run_tree = "/flush5/sco308/aiv_pipeline/introduction/raw_data/H7N7_20-02853_tree.png"
-       rmarkdown = config["program_dir"] + "/reporting/rmarkdown_test.Rmd"
+       rmarkdown = config["program_dir"] + "/reporting/rmarkdown_test.Rmd",
+       BLAST_table = "../introduction/raw_data/BLAST examples/blastresults.HA.csv"
     params:
        subtype_table = expand("02_irma_assembly/{sample}/irma_output/tables/READ_COUNTS.txt", sample=config["samples"])
     output:
@@ -138,6 +141,7 @@ rule make_report_testing:
             --CleavageSite PEKQTR*GLF \
             --tree {input.run_tree} \
             --HA_gene {input.HA_gene} \
+            --BLAST_table {input.BLAST_table}.\
             --rmarkdown {input.rmarkdown} \
             --output {output.report} \
             --output_dir .

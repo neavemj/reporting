@@ -52,7 +52,8 @@ render(opt$rmarkdown,
     subtype_table = opt$subtype_table,
     Cleavage_site = opt$CleavageSite,
     tree = opt$tree,
-    aa_seq_src = opt$HA_gene
+    aa_seq_src = opt$HA_gene,
+    BLAST_table = opt$BLAST_table
     ),
     output_file = opt$output,
     output_dir = opt$output_dir)
