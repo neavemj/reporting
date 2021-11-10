@@ -91,7 +91,7 @@ rule make_report:
        run_tree = expand("04_phylogenetics/{sample}_tree_finished.txt", sample=config["samples"]),
        HA_gene = "../introduction/raw_data/HA_alignment.align.fasta",
        rmarkdown = config["program_dir"] + "reporting/rmarkdown_test.Rmd",
-       BLAST_table = "../introduction/raw_data/BLAST examples/blastresults.HA.csv"
+       BLAST_table = "../introduction/raw_data/BLASTexamples/blastresults.HA.csv"
     params:
        subtype_table = expand("02_irma_assembly/{sample}/irma_output/tables/READ_COUNTS.txt", sample=config["samples"])
     output:

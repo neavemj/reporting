@@ -21,6 +21,9 @@ option_list <- list(
               
   make_option(c("--HA_gene"), type="character", default=NULL,
               help="HA sequence in fasta format", metavar="character"),
+  
+  make_option(c("--BLAST_table"), type="character", default=NULL,
+              help="BLAST table in csv format", metavar="character"),
               
   make_option(c("--output"), type="character", default=NULL,
               help="name and file path for word doc", metavar="character"),
