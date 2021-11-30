@@ -67,7 +67,11 @@ subtype_tb = read.delim(subtype_table, sep="\t")
 column1 = subtype_tb[,1]
 H_type = gsub("4-A_HA_", "", column1[grepl("4-A_HA", column1)])
 
-# Cleavage_site
+CSite = read.delim(Cleavage_site, header = FALSE, sep="")
+CleavageSite = CSite[1,1]
+CS_start = CSite[1,2]
+CS_end = CSite[1,3]
+HA_end = CSite[1,4]
 
 tree_text <- read.delim(tree, header = FALSE)
 
@@ -118,7 +122,7 @@ fpar(Table_numbers,
 
 #Table data 
 
-Table_1_dataset <- matrix(c(SAN, Sample_ID, Host, H_type, Cleavage_site), ncol = 5)
+Table_1_dataset <- matrix(c(SAN, Sample_ID, Host, H_type, CleavageSite), ncol = 5)
 colnames(Table_1_dataset) <- c("ACDP (AAHL) Sample No.", "Sample ID", "Host", "Subtype", "HA cleavage site sequence")
 Table_1_dataset <- as.data.frame(Table_1_dataset)
 
@@ -150,20 +154,32 @@ block_section(
 
 <br>
 
-```{r amino-acid-sequence, fig.asp = 0.3, fig.width = 10}
+```{r amino-acid-sequence}
 
-#Figure function
+#Figure placement
 
-p <- ggmsa(aa_seq_src,
-      char_width = 0.9,
-      seq_name = TRUE,
-      color = "Chemistry_AA" ) +
-  facet_msa(field = 70) 
+p <- ggmsa(aa_seq_src, 
+           char_width = 0.7,
+           seq_name = TRUE, consensus_views = TRUE, disagreement = FALSE, use_dot = FALSE, ref = "A_HA_H7",
+           color = "Chemistry_AA") +
+  facet_msa(field = 100) 
 
-dummy <- subset(p$layers[[1]]$data,  facet == 0)
+dummy <- subset(p$layers[[1]]$data,  facet == 3)
 
-p + geom_rect(data = dummy, mapping = aes(xmin = 40.5, xmax = 50, ymin = -Inf, ymax = Inf),
- color = "black", size = 1.5, fill = NA) 
+#Figure cleavage site
+sequence <- p + geom_rect(data = dummy, mapping = aes(xmin = CS_start + 0.5, xmax = CS_end + 0.5, ymin = -Inf, ymax = Inf),
+color = "black", size = 1.5, fill = NA) 
+
+
+# use ggsave for the sequence
+sequence_saved <- ggsave("HA gene_sequence.png", plot = sequence, device = "png", pdf(NULL), width = 16, height = 6, limits=F)
+
+#Figure placement
+
+  fpar(
+external_img(src = sequence_saved, width = 10, height = 4),
+fp_p = fp_par(text.align = "center")
+)
 
 #Figure caption
 
