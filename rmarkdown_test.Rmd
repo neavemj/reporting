@@ -166,6 +166,8 @@ p <- ggmsa(aa_seq_src,
 
 dummy <- subset(p$layers[[1]]$data,  facet == 3)
 
+warning("Facet = 3 because Cleavage Site is in between 300 - 400. Facet will need be changed if cleavage site is outside of this range.")
+
 #Figure cleavage site
 sequence <- p + geom_rect(data = dummy, mapping = aes(xmin = CS_start + 0.5, xmax = CS_end + 0.5, ymin = -Inf, ymax = Inf),
 color = "black", size = 1.5, fill = NA) 
