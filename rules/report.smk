@@ -86,27 +86,34 @@ rule make_report:
         Making the report in R
         """
     input:
-       SAN_table = f"san_{list(config['samples'].keys())[0][0:8]}_dump.csv",
-       run_IRMA = expand("02_irma_assembly/{sample}/IRMA_COMPLETE", sample=config["samples"]),
-       run_tree = expand("04_phylogenetics/{sample}_tree_finished.txt", sample=config["samples"]),
-       HA_gene = "../introduction/raw_data/A_HA_H7_NCBI.aa.aligned.fasta",
-       rmarkdown = config["program_dir"] + "reporting/rmarkdown_test.Rmd",
-       BLAST_table = "../introduction/raw_data/BLASTexamples/blastresults.HA.csv",
-       CleavageSite = "../introduction/raw_data/exampleCSoutput.txt"
+        SAN_table = f"san_{list(config['samples'].keys())[0][0:8]}_dump.csv",
+        run_IRMA = expand("02_irma_assembly/{sample}/IRMA_COMPLETE", sample=config["samples"]),
+        run_annotation = expand("03_annotation/{sample}/ANNOTATION_COMPLETE", sample=config["samples"]),
+        run_tree = expand("04_phylogenetics/{sample}_tree_finished.txt", sample=config["samples"]),
+        
+        # HA_gene = "../introduction/raw_data/A_HA_H7_NCBI.aa.aligned.fasta",
+        # BLAST_table = "../introduction/raw_data/BLASTexamples/blastresults.HA.csv",
+        # CleavageSite = "../introduction/raw_data/exampleCSoutput.txt"
+        
     params:
-       subtype_table = expand("02_irma_assembly/{sample}/irma_output/tables/READ_COUNTS.txt", sample=config["samples"])
+        rmarkdown = config["program_dir"] + "reporting/rmarkdown_test.Rmd",
+        subtype_table = expand("02_irma_assembly/{sample}/irma_output/tables/READ_COUNTS.txt", sample=config["samples"])
+        annotation_dir = "03_annotation/{sample}/"
     output:
-       report = "report.docx"
+        report = "report.docx"
     shell:
         """
         Rscript {config[program_dir]}/reporting/run_rmarkdown.R \
             --SAN_table {input.SAN_table} \
             --subtype_table {params.subtype_table} \
-            --CleavageSite {input.CleavageSite} \
-            --tree {input.run_tree} \
-            --HA_gene {input.HA_gene} \
-            --BLAST_table {input.BLAST_table} \
-            --rmarkdown {input.rmarkdown} \
+            --annotation_dir {params.annotation_dir} \
+        
+        #    --CleavageSite {input.CleavageSite} \
+        #    --tree {input.run_tree} \
+        #    --HA_gene {input.HA_gene} \
+        #    --BLAST_table {input.BLAST_table} \
+        
+            --rmarkdown {params.rmarkdown} \
             --output {output.report} \
             --output_dir .
         """
