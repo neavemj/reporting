@@ -1,0 +1,270 @@
+---
+output:
+  officedown::rdocx_document:
+    reference_docx: "custom-reference.docx"
+params:
+  table1: "NA"
+  annotation_dir: "NA"
+  tree: "NA"
+---
+
+
+```{r setup, include=FALSE, warning = FALSE}
+
+knitr::opts_knit$set(root.dir = working_dir)
+
+library(knitr)
+library(dplyr)
+library(officedown)
+library(officer)
+library(rmarkdown)
+library(ggmsa)
+library(ggplot2)
+library(yaml)
+library(flextable)
+library(Biostrings)
+
+# set chunks defaults
+knitr::opts_chunk$set(
+  echo       = FALSE,
+  message    = FALSE,
+  warning    = FALSE
+)
+
+# now read data for making the report
+
+# table1 <- params$table1
+
+table1 <- read.csv("/flush5/nea040/AIV_pipeline/test7_twoH7s_allmodules/05_report/table1.txt", sep=",", header=F)
+
+# tree <- params$tree
+
+
+#Figure and table formatting
+
+Caption_label <- fp_text(font.size = 11, bold = TRUE)
+Figure_numbers <- run_autonum(seq_id = "Figure", pre_label = "Fig. ", bkm = NULL, prop = Caption_label)
+Table_numbers <- run_autonum(seq_id = "Table", pre_label = "Table ", prop = Caption_label)
+
+
+```
+
+``` {r}
+
+# get SAN for use in headings, captions, etc
+
+SAN = table1[1,1]
+
+#The report is built for only one subtype, so the subtype will be the same for every sample
+
+#May need to bind Cleavage site files
+
+CSite = read.delim(Cleavage_site, header = FALSE, sep="")
+CleavageSite = CSite[1,1]
+CS_start = CSite[1,2]
+CS_end = CSite[1,3]
+HA_end = CSite[1,4]
+
+tree_text <- read.delim(tree, header = FALSE)
+
+tree_png <- tree_text[1,1]
+
+BLAST_tb = read.csv("/flush5/nea040/AIV_pipeline/test7_twoH7s_allmodules/05_report/20-02662-0011_blast.csv", header = FALSE)
+
+```
+
+# Next Generation Sequencing Analysis for SAN `r SAN`
+
+This analysis provides an identity analysis of the whole genome sequence data generated at ACDP (AAHL) SAN `r SAN` samples.
+
+**Interpretation**
+
+The HA gene sequence data suggests that the detected virus is most similar to ...
+
+* Dot point 1
+* Dot point 2
+
+**This analysis contains:**
+
+1. Sample information from which sequences were obtained
+1. HA sequence alignment comparison to virus sequence with ...
+`r ifelse(grepl("png", tree_png), paste("3. Phylogenetic tree showing the relationship of sample", SAN, "with other viruses"), "")`
+1. BLAST results for each gene segment for sample `r SAN`
+
+```{r}
+block_section(prop_section(type = "continuous"))
+```
+
+## 1. Sample information from which sequences were obtained
+
+Avian influenza A virus (AIV) whole genome sequences of the `r H_type` subtype was generated directly from the samples / from virus isolates as shown in Table 1.
+
+All XXXX samples shared XXXX% nucleotide and XXXX% amino acid similarity for the eight viral segments. [delete if not applicable]
+
+```{r summary-table}
+
+
+#Table caption
+
+fpar(Table_numbers,
+  ftext(
+  paste(SAN, "AIV PCR positive samples from which virus sequences were obtained", sep = " "), 
+  fp_text(font.size = 11, italic = FALSE)),
+  fp_p = fp_par(padding.bottom = 10)
+  )
+
+#Table data 
+
+colnames(table1) <- c("ACDP (AAHL) Sample No.", "Submitter ID", "Host", "Sample Type", "HA cleavage site", "Subtype")
+
+
+#Table formatting
+
+thick_border = fp_border(color="black", width = 2)
+thin_border = fp_border(color="gray", width = 0.5)
+
+flextable(table1)%>%
+  fontsize(part = "all", size = 10) %>%
+  bold(i = 1, part = "header") %>%
+  align(align = "center", part = "all") %>%
+  set_table_properties(width = 1, layout = "autofit") %>%
+  padding(padding = 5, part = "all") %>%
+  border_remove() %>%
+  border_outer(part="all", border = thick_border)%>%
+  border_inner_v(part = "all", border = thin_border)%>%
+  border_inner_h(part = "body", border = thin_border)
+  
+block_section(
+  prop_section(
+      page_size = page_size(orient = "portrait"),
+      type = "continuous"
+  )
+)
+
+
+```
+
+## 2. HA sequence alignment comparison to virus sequence with ...  
+
+<br>
+
+```{r amino-acid-sequence}
+
+#Figure placement
+
+#Need to read the fasta file into a data frame to get the name of the ref HA gene for the sequence alignment. The fasta file should have the ref HA gene as the first row as this has been hard-coded in the script 
+Ref_HA <- readRNAStringSet(aa_seq_src)%>%
+  names()
+
+p <- ggmsa(aa_seq_src, 
+           char_width = 0.7,
+           seq_name = TRUE, consensus_views = TRUE, disagreement = FALSE, use_dot = FALSE, ref = Ref_HA[1],
+           color = "Chemistry_AA") +
+  facet_msa(field = 100) 
+
+dummy <- subset(p$layers[[1]]$data,  facet == 3)
+
+warning("Facet = 3 because Cleavage Site is in between 300 - 400. Facet will need be changed if cleavage site is outside of this range.")
+
+#Figure cleavage site
+sequence <- p + geom_rect(data = dummy, mapping = aes(xmin = CS_start + 0.5, xmax = CS_end + 0.5, ymin = -Inf, ymax = Inf),
+color = "black", size = 1.5, fill = NA) 
+
+
+# use ggsave for the sequence
+sequence_saved <- ggsave("HA gene_sequence.png", plot = sequence, device = "png", pdf(NULL), width = 16, height = 6, limits=F)
+
+#Figure placement
+
+  fpar(
+external_img(src = sequence_saved, width = 10, height = 4),
+fp_p = fp_par(text.align = "center")
+)
+
+#Figure caption
+
+fpar(Figure_numbers,
+  ftext(
+  paste(SAN, H_type, "HA amino acid sequence alignment. Position of the multi-basic HA cleavage site is indicated by the black box.", sep = " "), fp_text(font.size = 11, italic = TRUE)),
+fp_p = fp_par(text.align = "center"))
+
+block_section(
+  prop_section(
+      page_size = page_size(orient = "landscape"),
+      type = "continuous"
+  )
+)
+
+```
+
+## `r ifelse(grepl("png", tree_png), paste("3. Phylogenetic tree showing the relationship of sample", SAN, "with other viruses"), "")`  
+
+<br>
+
+```{r phylogenetic-tree-image}
+
+#Figure placement
+
+if(grepl("png", tree_png)){
+  fpar(
+external_img(src = tree_png, height = 7.87, width = 6.5),
+
+fp_p = fp_par(text.align = "center")
+)
+}
+
+if(grepl("png", tree_png)){
+fpar(Figure_numbers,
+  ftext(
+  paste("Phylogenetic tree based on near full-length", H_type,"HA gene sequences (1648bp) showing the relationship of sample", SAN, "(green) to other endemic and exotic", H_type, "HA viruses.", sep = " "), fp_text(font.size = 11, italic = TRUE)),
+fp_p = fp_par(text.align = "left", border = fp_border(color = "black", style = "solid", width = 0.5)))
+}
+
+```
+
+```{r}
+block_section(prop_section(type = "continuous"))
+```
+
+## `r ifelse(grepl("png", tree_png), paste("4."), "3.")` BLAST results for each gene segment for sample `r SAN`  
+ 
+<br>
+
+```{r blast-tables}
+
+#Table caption
+
+fpar(Table_numbers,
+  ftext(
+  paste("Nucleotide BLAST analysis of the", H_type, "-HA segment from", SAN, "against the NCBI GenBank and National Avian Influenza in Wild Birds (NAIWB) surveillance virus sequence database. This table shows the 10 highest pairwise matching virus sequences", sep = " "), 
+  fp_text(font.size = 11, italic = FALSE)),
+  fp_p = fp_par(padding.bottom = 10)
+  )
+
+#Table data 
+
+colnames(BLAST_tb) = c("Segment", "Closest Match", "Similarity (%)", "Length")
+
+#Table formatting
+
+thick_border = fp_border(color="black", width = 2)
+thin_border = fp_border(color="gray", width = 0.5)
+
+flextable(BLAST_tb)%>%
+  fontsize(part = "all", size = 10) %>%
+  bold(i = 1, part = "header") %>%
+  align(align = "center", part = "all") %>%
+  set_table_properties(width = 1, layout = "autofit") %>%
+  padding(padding = 5, part = "all") %>%
+  border_remove() %>%
+  border_outer(part="all", border = thick_border)%>%
+  border_inner_v(part = "all", border = thin_border)
+  
+block_section(
+  prop_section(
+      page_size = page_size(orient = "portrait"),
+      type = "continuous"
+  )
+)
+
+```
