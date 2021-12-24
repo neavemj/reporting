@@ -24,11 +24,12 @@ import requests
 import json
 from pathlib import Path
 import glob
+import csv
 
 
 rule all_report:
     input:
-        "05_report/table1.txt"
+        expand("05_report/{sample}_blast.csv", sample=config["samples"])
 
 
 rule san_lookup:
@@ -96,7 +97,7 @@ rule combine_annotations:
     params:
         annotation_dir = "03_annotation/{sample}/",
     output:
-        table1 = "05_report/table1_{sample}.txt"
+        table1 = "05_report/table1_{sample}.csv"
     run:
         # combine SAN and annotation info into a table for the report
         # get SAN table info 
@@ -127,13 +128,43 @@ rule combine_samples:
     # this rule takes individual sample annotations and cat's them 
     # together for the report
     input:
-        expand("05_report/table1_{sample}.txt", sample=config["samples"])
+        expand("05_report/table1_{sample}.csv", sample=config["samples"])
     output:
-        "05_report/table1.txt"
+        "05_report/table1.csv"
     shell:
         """
         cat {input} > {output}
         """
+
+
+rule combine_blast_tables:
+    # this rule will combine blast results for each segment for a single sample
+    input:
+        run_annotation = "03_annotation/{sample}/ANNOTATION_COMPLETE",
+    params:
+        annotation_dir = "03_annotation/{sample}/",
+    output:
+        blast_table = "05_report/{sample}_blast.csv"
+    run:        
+        # blast tables in the annotation directory
+        # sorting the results to get some sort of order into the table
+        blast_tables = sorted(glob.glob(params.annotation_dir + "*blast.csv"))
+        # should return 8 tables if each segment is in there
+        table_rows = []
+        for tb in blast_tables:
+            with open(tb) as infile:
+                # blast tables look like this:
+                # ,qseqid,sseqid,qlen,slen,pident,length,mismatch,gapopen,qstart,qend,sstart,send,evalue,bitscore
+                #0,A_PB1,gb|CY015025.1|,2341,2341,99.487,780,4,0,2,2341,1,2340,0.0,1854
+                header = next(infile)
+                for line in infile:
+                    # just grab the query id (col2), subject id (col3), pident (col6) and length (col7)
+                    cols = [line.split(",")[i] for i in [1,2,5,6]]
+                    table_rows.append(cols)          
+        # write out info into a table for the report
+        with open(output.blast_table, "w") as f:
+            writer = csv.writer(f)
+            writer.writerows(table_rows)
 
 
 rule make_report:
@@ -144,7 +175,7 @@ rule make_report:
         """
     input:
         #SAN_table = f"san_{list(config['samples'].keys())[0][0:8]}_dump.csv",
-        run_IRMA = expand("02_irma_assembly/{sample}/IRMA_COMPLETE", sample=config["samples"]),
+        table1 = "05_report/table1.csv",
         run_annotation = expand("03_annotation/{sample}/ANNOTATION_COMPLETE", sample=config["samples"]),
         run_tree = expand("04_phylogenetics/{sample}_tree_finished.txt", sample=config["samples"]),       
     params:
@@ -158,8 +189,7 @@ rule make_report:
     shell:
         """
         Rscript {config[program_dir]}/reporting/scripts/run_rmarkdown.R \
-            --SAN_table {input.SAN_table} \
-            --subtype_table {params.subtype_table} \
+            --table1 {input.table1} \
             --annotation_dir {params.annotation_dir} \
             --rmarkdown {params.rmarkdown} \
             --word_template {params.word_template} \
