@@ -32,6 +32,38 @@ rule all_report:
         expand("05_report/{sample}_blast.csv", sample=config["samples"])
 
 
+rule draw_dag:
+    input:
+        "AIV_pipe.snakefile"
+    output:
+        "benchmarks/dag.png"
+    shell:
+        "snakemake -s {input} --rulegraph 2> /dev/null | dot -T png > {output}"
+
+
+rule get_package_versions:
+    input:
+        config["program_dir"] + "qc/config/software_list.txt"
+    output:
+        "logs/software_versions.txt"
+    params:
+        # for some reason, I have to define the sed pattern here, then pass it in
+        # otherwise it is weirdly expanded in the actual shell command
+        sed_pat1 = r"s/\(.*\)/^\1\t/g",
+        sed_pat2 = r"s/ \+/\t/g"
+    shell:
+        # lists all packages in the conda environment
+        # replaces large whitespace with tabs
+        # greps for specific packages with ^ and \t to ensure complete match
+        # cuts just the first 2 columns of interest
+        """
+        conda list | \
+            sed "{params.sed_pat2}" | \
+            grep -f <(cat {input} | sed "{params.sed_pat1}") | \
+            cut -f 1,2 > {output}
+        """
+
+
 rule san_lookup:
     message: textwrap.dedent(f"""
         Query Sample Manager for SAN job/sample details
