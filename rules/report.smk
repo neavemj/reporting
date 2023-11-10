@@ -27,9 +27,9 @@ import glob
 import csv
 
 
-rule all_report:
-    input:
-        expand("05_report/{sample}_blast.csv", sample=config["samples"])
+#rule all_report:
+#   input:
+#       expand("05_report/{sample}_blast.csv", sample=config["samples"])
 
 
 rule draw_dag:
@@ -38,7 +38,7 @@ rule draw_dag:
     output:
         "benchmarks/dag.png"
     shell:
-        "snakemake -s {input} --rulegraph 2> /dev/null | dot -T png > {output}"
+        "snakemake -s {input} --dag | dot -T png > {output}"
 
 
 rule get_package_versions:
@@ -160,7 +160,7 @@ rule combine_samples:
     # this rule takes individual sample annotations and cat's them 
     # together for the report
     input:
-        expand("05_report/table1_{sample}.csv", sample=config["samples"])
+        "05_report/table1_{sample}.csv",
     output:
         "05_report/table1.csv"
     shell:
@@ -208,11 +208,11 @@ rule make_report:
     input:
         #SAN_table = f"san_{list(config['samples'].keys())[0][0:8]}_dump.csv",
         table1 = "05_report/table1.csv",
-        run_annotation = expand("03_annotation/{sample}/ANNOTATION_COMPLETE", sample=config["samples"]),
-        run_tree = expand("04_phylogenetics/{sample}_tree_finished.txt", sample=config["samples"]),       
+        run_annotation = "03_annotation/{sample}/ANNOTATION_COMPLETE",
+        run_tree = "04_phylogenetics/{sample}_tree_finished.txt",       
     params:
         #subtype_table = expand("02_irma_assembly/{sample}/irma_output/tables/READ_COUNTS.txt", sample=config["samples"]),
-        annotation_dir = expand("03_annotation/{sample}/", sample=config["samples"]),
+        annotation_dir = "03_annotation/{sample}/",
         rmarkdown = config["program_dir"] + "reporting/scripts/build_report.Rmd",
         word_template = config["program_dir"] + "reporting/scripts/custom-reference.docx",
 
@@ -237,9 +237,9 @@ rule make_report_testing:
         Making the report in R
         """
     input:
-       SAN_table = f"san_{list(config['samples'].keys())[0][0:8]}_dump.csv",
-       run_IRMA = expand("02_irma_assembly/{sample}/IRMA_COMPLETE", sample=config["samples"]),
-       run_tree = expand("04_phylogenetics/{sample}_tree_finished.txt", sample=config["samples"]),
+       #SAN_table = f"san_{list(config['samples'].keys())[0][0:8]}_dump.csv",
+       run_IRMA = "02_irma_assembly/{sample}/IRMA_COMPLETE",
+       run_tree = "04_phylogenetics/{sample}_tree_finished.txt",
        HA_gene = "../introduction/raw_data/HA_alignment.align.fasta",
       # SampleID = "21-000-ID",
       # Host = "wild bird",
@@ -249,7 +249,7 @@ rule make_report_testing:
        rmarkdown = config["program_dir"] + "/reporting/rmarkdown_test.Rmd",
        BLAST_table = "../introduction/raw_data/BLAST examples/blastresults.HA.csv"
     params:
-       subtype_table = expand("02_irma_assembly/{sample}/irma_output/tables/READ_COUNTS.txt", sample=config["samples"])
+       subtype_table = "02_irma_assembly/{sample}/irma_output/tables/READ_COUNTS.txt",
     output:
         report = "reportTEST_01.docx"
     shell:
